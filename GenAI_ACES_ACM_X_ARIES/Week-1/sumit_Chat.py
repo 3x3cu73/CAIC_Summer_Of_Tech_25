@@ -88,10 +88,10 @@ def agent_conversation(user_question, max_rounds=3):
     return current_response, agent_b_feedback
 
 
-# Main conversation loop with silent agent discussion
-print("🚀 Multi-Agent AI Chat System")
+
+print("Multi-Agent AI Chat System")
 print("Agent A (Groq): Domain Expert | Agent B (Gemini): Critic/Validator")
-print("Agents discuss silently in background - you see only final validated answers")
+print("Agents discuss silently in background")
 print("Type 'exit' to quit")
 print("-" * 60)
 
