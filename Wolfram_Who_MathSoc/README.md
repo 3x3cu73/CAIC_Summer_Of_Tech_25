@@ -17,8 +17,13 @@ This isn’t about speed or competition — it’s about patterns, ideas, and th
 
 
 ---
-## 📅 Week 2: 
-- coming soon!
+## 📅 Week 2 Graph Theory: 
+- Topics: Basics and Terminologies, Eulerian and Hamiltonian Paths, Tress etc.
+
+---
+
+## 📅 Week 3: 
+- Topics: Coming soon
 
 ---
 ## 🧰 Extra Resources
