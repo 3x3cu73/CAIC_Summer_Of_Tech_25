@@ -2,6 +2,7 @@ from fastapi import FastAPI, Request
 from pydantic import BaseModel
 from typing import Literal
 import numpy as np
+import pandas as pd
 import joblib
 import uvicorn
 
@@ -23,13 +24,13 @@ model = joblib.load("like_predictor.pkl")
 @app.post("/predict")
 async def predict(data: PredictionRequest):
     # Convert input data to NumPy array
-    features = np.array([
-        data.word_count,
-        data.char_count,
-        data.has_media,
-        data.hour,
-        data.sentiment
-    ]).reshape(1, -1)
+    features = pd.DataFrame([{
+        "word_count": data.word_count,
+        "char_count": data.char_count,
+        "has_media": data.has_media,
+        "hour": data.hour,
+        "sentiment": data.sentiment
+    }])
 
     # Make prediction
     prediction = model.predict(features)[0]
