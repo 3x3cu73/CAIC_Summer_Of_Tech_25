@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
-const API_BASE = 'http://107.21.74.109:3000';
+const API_BASE = 'https://api.sumitsaw.tech';
 
 export default function RouteManager() {
   const [routes, setRoutes] = useState([]);
