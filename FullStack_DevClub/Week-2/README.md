@@ -1,5 +1,5 @@
-#Deployed at : https://chat.sumitsaw.tech
-ApI server : https://api.sumitsaw.tech
+# Deployed at : https://chat.sumitsaw.tech
+# ApI server : https://api.sumitsaw.tech
 
 # CAIC Summer of Tech 2025: Full-Stack Chat App Development
 ## Week 2: Authentication System and Core Messaging Logic
