@@ -37,7 +37,7 @@ function Register({children}: Props) {
 
 
         axios.post(
-            `${apiBaseUrl}register`,
+            `${apiBaseUrl}/register`,
             {username, password,email},
             {
                 headers: {'Content-Type': 'application/json'},

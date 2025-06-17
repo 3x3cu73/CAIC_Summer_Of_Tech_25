@@ -30,7 +30,7 @@ function Login({children}: Props) {
 
 
         axios.post(
-            `${apiBaseUrl}login`,
+            `${apiBaseUrl}/login`,
             {username, password},
             {
                 headers: {'Content-Type': 'application/json'},

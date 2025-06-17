@@ -8,7 +8,7 @@ function Dashboard() {
 
     useEffect(() => {
         const apiBaseUrl = import.meta.env.VITE_API_BASE;
-        axios.post(`${apiBaseUrl}validate`, {}, {
+        axios.post(`${apiBaseUrl}/validate`, {}, {
             headers: { 'Content-Type': 'application/json' },
             withCredentials: true,
         })
