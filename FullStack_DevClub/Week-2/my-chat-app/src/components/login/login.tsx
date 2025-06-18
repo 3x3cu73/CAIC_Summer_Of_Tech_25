@@ -1,6 +1,7 @@
 import React, {useState} from "react";
 import axios from 'axios';
 import {Link, useNavigate} from "react-router-dom";
+import toast from "react-hot-toast";
 
 type Props = {
     children?: React.ReactNode,
@@ -38,11 +39,12 @@ function Login({children}: Props) {
             }
         )
             .then(res => {
+                toast.success('Login successful');
                 console.log('Login successful:', res.data);
                 navigate('/');
 
             })
-            .catch(err => {
+            .catch(err => {toast.error('Login failed ', err.response ? err.response.data['error'] : err.message);
                 console.error('Login failed:', err.response ? err.response.data : err.message);
             });
 
