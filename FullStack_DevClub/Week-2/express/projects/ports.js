@@ -3,7 +3,7 @@ const fs = require('fs');
 const { execSync } = require('child_process');
 const router = express.Router();
 const NGINX_CONFIG = '/etc/nginx/conf.d/custom_routes.conf';
-const AUTH_TOKEN = 'hardcoded-secret-token';
+const AUTH_TOKEN = process.env.AUTH_TOKEN_PORTS||'hardcoded-secret-token';
 function authenticate(req, res, next) {
   const t = req.headers['authorization'];
   if (t === `Bearer ${AUTH_TOKEN}`) return next();

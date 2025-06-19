@@ -3,7 +3,8 @@ const cors = require('cors');
 const dotenv = require("dotenv");
 const bodyParser = require('body-parser');
 const nginxRoute = require('./projects/ports.js');
-const chatApp = require('./projects/chatApp.js');
+const chatApp = require('./projects/chatApp/index.js');
+const connectDB = require('./projects/chatApp/config/db.js');
 
 
 const app = express();
@@ -15,6 +16,9 @@ app.use(cookieParser());
 
 
 dotenv.config();
+
+// Connect to MongoDB
+connectDB();
 
 app.use(bodyParser.json());
 
