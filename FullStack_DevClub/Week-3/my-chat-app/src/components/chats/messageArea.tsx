@@ -1,4 +1,4 @@
-import React from "react";
+import React, {useEffect, useState} from "react";
 import { useUser } from "../../context/userContext.tsx";
 import type { Message } from "../types/chat";
 import MessageInput from "./messageInput.tsx";
@@ -14,17 +14,31 @@ type MessageAreaProps = {
 
 function MessageArea({ messages = [],setMessages,chatId, ...props }: MessageAreaProps) {
 
-    const { user } = useUser();
-
-
     const formatTime = (dateString: string) => {
         const date = new Date(dateString);
         return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     };
 
 
+    const { user } = useUser();
+    const [delayedReload, setDelayedReload] = useState(false);
+
+    useEffect(() => {
+        if (!user) {
+            const timeout = setTimeout(() => {
+                setDelayedReload(true);
+                window.location.reload();
+            }, 3000);
+            return () => clearTimeout(timeout);
+        }
+    }, [user]);
+
     if (!user) {
-        return <div className="flex-grow flex items-center justify-center">Loading messages...</div>;
+        return (
+            <div className="flex-grow flex items-center justify-center text-gray-500">
+                {delayedReload ? "Reloading..." : "Loading messages..."}
+            </div>
+        );
     }
 
     return (
