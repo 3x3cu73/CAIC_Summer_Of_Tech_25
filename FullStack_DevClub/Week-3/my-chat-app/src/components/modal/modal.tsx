@@ -1,18 +1,35 @@
-// src/components/Modal.tsx
+// src/components/modal/modal.tsx
 
 import React, { useEffect, useRef } from 'react';
 import ReactDOM from 'react-dom';
+import { X } from 'lucide-react';
+import LoadingButton from "../ui/button.tsx"; // Assuming this path is correct
 
-// Define the props for the Modal component using a TypeScript interface
+// Define the props for the Modal component
 interface ModalProps {
     isOpen: boolean;
     onClose: () => void;
     onSubmit: () => void;
     title: string;
     children: React.ReactNode;
+    // New props for LoadingButton integration
+    isLoading?: boolean;
+    submitText?: string;
+    loadingText?: string;
+    isSubmitDisabled?: boolean;
 }
 
-const Modal: React.FC<ModalProps> = ({ isOpen, onClose, onSubmit, title, children }) => {
+const Modal: React.FC<ModalProps> = ({
+                                         isOpen,
+                                         onClose,
+                                         onSubmit,
+                                         title,
+                                         children,
+                                         isLoading = false,
+                                         submitText = "Submit",
+                                         loadingText = "Processing...",
+                                         isSubmitDisabled = false,
+                                     }) => {
     const modalRef = useRef<HTMLDivElement>(null);
 
     // Effect to handle closing the modal on 'Escape' key press
@@ -24,11 +41,14 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, onSubmit, title, childre
         };
 
         if (isOpen) {
+            // Add overflow hidden to body when modal is open to prevent background scrolling
+            document.body.style.overflow = 'hidden';
             document.addEventListener('keydown', handleKeyDown);
         }
 
-        // Cleanup function to remove the event listener
+        // Cleanup function
         return () => {
+            document.body.style.overflow = 'unset';
             document.removeEventListener('keydown', handleKeyDown);
         };
     }, [isOpen, onClose]);
@@ -38,69 +58,64 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, onSubmit, title, childre
         return null;
     }
 
-    // Use a portal to render the modal at the root of the document
-    // This helps in avoiding z-index issues and keeps the DOM clean
+    // Use a portal to render the modal
     return ReactDOM.createPortal(
-        // Backdrop: a semi-transparent overlay that covers the entire screen
+        // Backdrop
         <div
-            className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-sm transition-opacity duration-300"
-            onClick={onClose} // Close modal when backdrop is clicked
+            className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm transition-opacity duration-300 p-4"
+            onClick={onClose}
+            aria-modal="true"
+            role="dialog"
         >
-            {/* Modal Panel: the main content of the modal */}
+            {/* Modal Panel */}
             <div
                 ref={modalRef}
-                className="relative w-full max-w-lg rounded-xl bg-white p-6 shadow-2xl transition-all duration-300 dark:bg-slate-800"
+                // Added transform transition for a subtle pop-in effect
+                className="relative w-full max-w-lg rounded-xl bg-white p-6 shadow-2xl transition-all duration-300 transform scale-95 hover:scale-100"
                 onClick={(e) => e.stopPropagation()} // Prevent clicks inside the modal from closing it
             >
                 {/* Modal Header */}
-                <div className="flex items-start justify-between border-b border-slate-200 pb-4 dark:border-slate-700">
-                    <h3 className="text-2xl font-semibold text-slate-900 dark:text-white">
+                <div className="flex items-center justify-between mb-5">
+                    <h3 className="text-2xl font-bold text-slate-800">
                         {title}
                     </h3>
                     <button
                         onClick={onClose}
-                        className="rounded-full p-1 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-slate-700 dark:hover:text-white"
+                        className="rounded-full p-1 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600"
                         aria-label="Close modal"
                     >
-                        {/* A simple X icon for closing */}
-                        <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            className="h-6 w-6"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke="currentColor"
-                        >
-                            <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth={2}
-                                d="M6 18L18 6M6 6l12 12"
-                            />
-                        </svg>
+                        <X className="w-6 h-6" />
                     </button>
                 </div>
 
-                {/* Modal Body: where the custom children are rendered */}
-                <div className="mt-4 text-base leading-relaxed text-slate-600 dark:text-slate-300">
+                {/* Modal Body */}
+                <div className="text-base text-slate-600">
                     {children}
                 </div>
 
-                {/* Modal Footer: contains action buttons */}
-                <div className="mt-6 flex items-center justify-end space-x-3 border-t border-slate-200 pt-4 dark:border-slate-700">
+                {/* Modal Footer */}
+                <div className="mt-6 flex items-center justify-end space-x-3 pt-4">
                     <button
                         onClick={onClose}
                         type="button"
-                        className="rounded-lg bg-slate-100 px-5 py-2.5 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-200 focus:outline-none focus:ring-4 focus:ring-slate-300 dark:bg-slate-700 dark:text-slate-200 dark:hover:bg-slate-600"
+                        // Secondary style for the cancel button
+                        className="rounded-lg border border-slate-300 px-5 py-2.5 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-100 focus:outline-none focus:ring-4 focus:ring-slate-200"
+                        disabled={isLoading} // Disable cancel while loading
                     >
                         Cancel
                     </button>
-                    <button
+
+                    {/* Integrated LoadingButton */}
+                    <LoadingButton
                         onClick={onSubmit}
-                        type="button"
-                        className="rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-300 dark:focus:ring-blue-800"
+                        loading={isLoading}
+                        loadText={loadingText}
+                        disabled={isSubmitDisabled || isLoading}
+                        // Primary style using Indigo to match the app theme
+                        className="rounded-lg bg-indigo-600 px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-indigo-700 focus:outline-none focus:ring-4 focus:ring-indigo-300 disabled:opacity-50"
                     >
-                        Submit Action
-                    </button>
+                        {submitText}
+                    </LoadingButton>
                 </div>
             </div>
         </div>,

@@ -2,121 +2,128 @@ import React, {useState} from "react";
 import axios from 'axios';
 import {Link, useNavigate} from "react-router-dom";
 import toast from "react-hot-toast";
-
-type Props = {
-    children?: React.ReactNode,
-};
+import { User, Lock, LogIn, Eye, EyeOff, Loader2 } from 'lucide-react';
 
 const apiBaseUrl = import.meta.env.VITE_API_BASE;
 
-function Login({children}: Props) {
+function Login() {
     const navigate = useNavigate();
-    // 1. State variables for username and password
+
     const [username, setUsername] = useState<string>('');
     const [password, setPassword] = useState<string>('');
+    const [isLoading, setIsLoading] = useState<boolean>(false);
+    const [showPassword, setShowPassword] = useState<boolean>(false);
 
-    // 2. Handler for username input changes
-    const handleUsernameChange = (e: any) => {
-        setUsername(e.target.value);
-    };
-
-    // 3. Handler for password input changes
-    const handlePasswordChange = (e: any) => {
-        setPassword(e.target.value);
-    };
-
-    // 4. Handler for form submission
     const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
+        if (isLoading) return; // Prevent multiple submissions
 
-
+        setIsLoading(true);
         axios.post(
             `${apiBaseUrl}/auth/login`,
-            {username, password},
+            { username, password },
             {
-                headers: {'Content-Type': 'application/json'},
+                headers: { 'Content-Type': 'application/json' },
                 withCredentials: true,
             }
         )
             .then(res => {
-                toast.success(res.data.message);
-                // console.log('Login successful:', res.data);
+                toast.success(res.data.message || 'Login successful!');
                 navigate('/');
-
             })
-            .catch(err => {toast.error('Login failed ', err.response ? err.response.data['error'] : err.message);
+            .catch(err => {
+                const errorMessage = err.response?.data?.error || 'Login failed. Please check your credentials.';
+                toast.error(errorMessage);
                 console.error('Login failed:', err.response ? err.response.data : err.message);
+            })
+            .finally(() => {
+                setIsLoading(false);
             });
-
     };
 
     return (
-        <div
-            className="bg-gradient-to-br from-indigo-500 to-purple-600 min-h-screen flex items-center justify-center p-4">
-            <div
-                className="bg-white p-8 rounded-xl shadow-2xl w-full max-w-md transform transition-all duration-300 hover:scale-[1.02] hover:shadow-3xl">
-                <h2 className="text-4xl font-extrabold text-center text-gray-900 mb-8">
-                    Welcome Back!
-                </h2>
-
-
-                <form onSubmit={handleSubmit} className="space-y-6">
-                    <div>
-                        <label htmlFor="username"
-                               className="block text-sm font-medium text-gray-700 sr-only">Username</label>
-                        <input
-                            type="text"
-                            name="username"
-                            id="username"
-                            placeholder="Username"
-                            className="block w-full px-4 py-3 border border-gray-300 rounded-lg text-lg placeholder-gray-500 focus:ring-blue-500 focus:border-blue-500 transition duration-150 ease-in-out"
-                            value={username}
-                            onChange={handleUsernameChange}
-                            required
-                        />
+        <div className="bg-slate-100 min-h-screen flex flex-col items-center justify-center p-4 font-sans">
+            <div className="w-full max-w-md">
+                <div className="bg-white p-8 md:p-10 rounded-2xl shadow-xl border border-slate-200">
+                    <div className="text-center mb-8">
+                        <div className="inline-block bg-indigo-100 p-3 rounded-full mb-4">
+                            <LogIn className="w-8 h-8 text-indigo-600" />
+                        </div>
+                        <h1 className="text-3xl font-bold text-slate-800">Welcome Back!</h1>
+                        <p className="text-slate-500 mt-2">Sign in to continue to your account.</p>
                     </div>
 
-                    <div>
-                        <label htmlFor="password"
-                               className="block text-sm font-medium text-gray-700 sr-only">Password</label>
-                        <input
-                            type="password"
-                            name="password"
-                            id="password"
-                            placeholder="Password"
-                            className="block w-full px-4 py-3 border border-gray-300 rounded-lg text-lg placeholder-gray-500 focus:ring-blue-500 focus:border-blue-500 transition duration-150 ease-in-out"
-                            value={password}
-                            onChange={handlePasswordChange}
-                            required
-                        />
-                    </div>
+                    <form onSubmit={handleSubmit} className="space-y-6">
+                        {/* Username Input */}
+                        <div className="relative">
+                            <User className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+                            <input
+                                type="text"
+                                name="username"
+                                id="username"
+                                placeholder="Username"
+                                className="block w-full pl-12 pr-4 py-3 border border-slate-300 rounded-lg text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
+                                value={username}
+                                onChange={(e) => setUsername(e.target.value)}
+                                required
+                                disabled={isLoading}
+                            />
+                        </div>
 
-                    <button
-                        type="submit"
-                        className="w-full bg-blue-600 text-white py-3 px-6 rounded-lg font-semibold text-lg hover:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-300 focus:ring-opacity-75 transition duration-150 ease-in-out shadow-lg hover:shadow-xl"
-                    >
-                        Login
-                    </button>
-                </form>
+                        {/* Password Input */}
+                        <div className="relative">
+                            <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+                            <input
+                                type={showPassword ? "text" : "password"}
+                                name="password"
+                                id="password"
+                                placeholder="Password"
+                                className="block w-full pl-12 pr-12 py-3 border border-slate-300 rounded-lg text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
+                                value={password}
+                                onChange={(e) => setPassword(e.target.value)}
+                                required
+                                disabled={isLoading}
+                            />
+                            <button
+                                type="button"
+                                onClick={() => setShowPassword(!showPassword)}
+                                className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
+                                aria-label={showPassword ? "Hide password" : "Show password"}
+                            >
+                                {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                            </button>
+                        </div>
 
-                <div className="mt-8 text-center text-gray-600 text-sm">
-                    Don't have an account?
-                    <Link to="/register"
-                       className="font-medium text-blue-600 hover:text-blue-700 transition duration-150 ease-in-out ml-1">Sign
-                        Up</Link>
+                        <div className="text-right text-sm">
+                            <Link to="/reset-password" className="font-medium text-indigo-600 hover:text-indigo-500 transition-colors">
+                                Forgot Password?
+                            </Link>
+                        </div>
+
+                        <button
+                            type="submit"
+                            disabled={isLoading}
+                            className="w-full flex justify-center items-center bg-indigo-600 text-white py-3 px-6 rounded-lg font-semibold text-lg hover:bg-indigo-700 focus:outline-none focus:ring-4 focus:ring-indigo-300 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                            {isLoading ? (
+                                <>
+                                    <Loader2 className="w-6 h-6 mr-2 animate-spin" />
+                                    <span>Signing In...</span>
+                                </>
+                            ) : (
+                                'Log In'
+                            )}
+                        </button>
+                    </form>
                 </div>
-                <div className="mt-2 text-center text-gray-600 text-sm">
-                    <Link to="/reset-password"
-                       className="font-medium text-blue-600 hover:text-blue-700 transition duration-150 ease-in-out">Forgot
-                        Password?</Link>
+
+                <div className="mt-6 text-center text-slate-600 text-sm">
+                    <span>Don't have an account? </span>
+                    <Link to="/register" className="font-semibold text-indigo-600 hover:text-indigo-500 transition-colors">
+                        Sign Up Now
+                    </Link>
                 </div>
             </div>
-
-            {children && (
-                <div className="mt-8 text-white text-center">
-                    {children}
-                </div>
-            )}
         </div>
     );
 }
