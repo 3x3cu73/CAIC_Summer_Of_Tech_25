@@ -107,7 +107,7 @@ exports.newChat = async (req, res) => {
             {path : 'latestMessage', select: 'content chat sender media'},]);
 
         await newChat.save()
-        res.status(200).json({success:true,message:"Chat created successfully."});
+        res.status(200).json({chat : newChat , success:true,message:"Chat created successfully."});
 
     } catch (err){
         console.error("Error creating chat :", err.message);

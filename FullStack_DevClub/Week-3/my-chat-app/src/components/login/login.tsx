@@ -3,11 +3,13 @@ import axios from 'axios';
 import {Link, useNavigate} from "react-router-dom";
 import toast from "react-hot-toast";
 import { User, Lock, LogIn, Eye, EyeOff, Loader2 } from 'lucide-react';
+import {useUser} from "../../context/userContext.tsx";
 
 const apiBaseUrl = import.meta.env.VITE_API_BASE;
 
 function Login() {
     const navigate = useNavigate();
+    const { refetchUser } = useUser(); // Add this line
 
     const [username, setUsername] = useState<string>('');
     const [password, setPassword] = useState<string>('');
@@ -29,6 +31,7 @@ function Login() {
         )
             .then(res => {
                 toast.success(res.data.message || 'Login successful!');
+                refetchUser(); // Add this line to refresh user data
                 navigate('/');
             })
             .catch(err => {

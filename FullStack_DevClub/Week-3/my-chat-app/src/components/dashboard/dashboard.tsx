@@ -53,6 +53,17 @@ function Dashboard() {
     const { user, loading: userLoading } = useUser();
     const navigate = useNavigate();
 
+    useEffect(() => {
+        if (!userLoading && !user?.username) {
+            const timer = setTimeout(() => {
+                if (!user?.username) {
+                    window.location.reload();
+                }
+            }, 2000);
+            return () => clearTimeout(timer);
+        }
+    }, [userLoading, user]);
+
 
     const [chats, setChats] = useState<any[]>([]);
     const [currChat, setCurrChat] = useState<any>(null);
@@ -75,19 +86,24 @@ function Dashboard() {
             });
     }, [navigate]);
 
-
-    useEffect(() => {
+    // Extract fetchChats into a separate function
+    const fetchChats = () => {
         if (!user?._id) return;
         setIsChatLoading(true);
         axios.post(`${apiBaseUrl}/chat/getChats`, {}, { withCredentials: true })
             .then((response) => {
                 setChats(response.data);
-                if (response.data.length > 0) {
+                // Only set the first chat as current if no chat is currently selected
+                if (response.data.length > 0 && !currChat) {
                     setCurrChat(response.data[0]);
                 }
             })
             .catch(() => toast.error("Could not fetch your chats."))
             .finally(() => setIsChatLoading(false));
+    };
+
+    useEffect(() => {
+        fetchChats();
     }, [user]);
 
 
@@ -143,13 +159,13 @@ function Dashboard() {
             .then(res => {
                 toast.success(res.data.message);
                 const newChat = res.data.chat;
-                setChats(prev => [newChat, ...prev]);
                 setCurrChat(newChat);
                 handleCloseChatModal();
+                setChats(prev => [newChat, ...prev]);
+
             })
             .catch(err => toast.error(err.response.data.message));
     };
-
 
     const logOut = () => {
         axios.post(`${apiBaseUrl}/auth/logout`, {}, { withCredentials: true })
