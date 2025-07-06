@@ -18,12 +18,20 @@ This isn’t about speed or competition — it’s about patterns, ideas, and th
 
 ---
 ## 📅 Week 2 Graph Theory: 
-- Topics: Basics and Terminologies, Eulerian and Hamiltonian Paths, Tress etc.
+
+- Topics: Basics and Terminologies, Eulerian and Hamiltonian Paths, Tress etc
 
 ---
 
-## 📅 Week 3: 
-- Topics: Coming soon
+## 📅 Week 3 Combinatorics:
+
+- Topics: Basic Counting, Ramsey's Theorem, Generating Functions etc.
+
+---
+
+## 📅 Week 4 Group Theory:
+
+- Topics: Basics and Terminologies, Applications in Combinatorics and Number theory
 
 ---
 ## 🧰 Extra Resources
