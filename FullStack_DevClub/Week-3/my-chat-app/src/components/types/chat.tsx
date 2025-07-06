@@ -5,7 +5,7 @@ export interface Sender {
     email: string;
 }
 
-// Type for the message object, using the Sender type
+
 export type Message = {
     _id: string;
     content: string;
