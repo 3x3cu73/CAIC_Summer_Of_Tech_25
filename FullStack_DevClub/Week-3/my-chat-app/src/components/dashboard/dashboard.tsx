@@ -233,7 +233,7 @@ function Dashboard() {
                 </div>
 
                 <div className="flex flex-col w-9/12">
-                    <MessageArea message={Messages}/>
+                    <MessageArea messages={Messages}/>
                 </div>
             </div>
         </>
