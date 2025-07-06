@@ -1,10 +1,10 @@
 import React, { useEffect, useRef } from "react";
 import { useUser } from "../../context/userContext.tsx";
-import type { Message } from "../types/chat"; // Make sure this path is correct
+import type { Message } from "../types/chat";
 import MessageInput from "./messageInput.tsx";
 import { Loader2 } from "lucide-react";
 ``
-// Define the correct prop types
+
 type MessageAreaProps = {
     messages: Message[];
     chatId: string;
@@ -15,23 +15,23 @@ function MessageArea({ messages = [], setMessages, chatId, ...props }: MessageAr
     const { user, loading: userLoading } = useUser();
     const messagesEndRef = useRef<null | HTMLDivElement>(null);
 
-    // --- Auto-scroll to the latest message ---
+
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
     };
 
-    // This effect runs whenever the messages array changes
+
     useEffect(() => {
         scrollToBottom();
     }, [messages]);
 
-    // --- Helper function to format timestamps ---
+
     const formatTime = (dateString: string) => {
         const date = new Date(dateString);
         return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     };
 
-    // --- Render a graceful loading state instead of reloading the page ---
+
     if (userLoading || !user) {
         return (
             <div className="flex-grow flex items-center justify-center text-slate-500 bg-slate-50">
@@ -44,10 +44,7 @@ function MessageArea({ messages = [], setMessages, chatId, ...props }: MessageAr
         <>
             <div
                 {...props}
-                className="flex-grow p-4 md:p-6 overflow-y-auto bg-slate-100"
-                // Optional: Add a subtle background pattern for a more polished look
-                // style={{ backgroundImage: 'url("/path/to/your/subtle-pattern.svg")', backgroundSize: '400px' }}
-            >
+                className="flex-grow p-4 md:p-6 overflow-y-auto bg-slate-100">
                 <div className="flex flex-col gap-y-2">
                     {messages.map((message, index) => {
                         const isCurrentUserSender = message.sender._id === user._id;
@@ -59,12 +56,12 @@ function MessageArea({ messages = [], setMessages, chatId, ...props }: MessageAr
                         const isFirstInGroup = !prevMessage || prevMessage.sender._id !== message.sender._id;
                         const isLastInGroup = !nextMessage || nextMessage.sender._id !== message.sender._id;
 
-                        // --- Dynamically adjust bubble shape for grouping ---
+
                         if (isCurrentUserSender) {
                         } else {
                         }
 
-                        // Make tail sharper on last message of a group
+
                         const tailClass = isLastInGroup ? (isCurrentUserSender ? 'rounded-br-none' : 'rounded-bl-none') : '';
 
 
@@ -91,10 +88,10 @@ function MessageArea({ messages = [], setMessages, chatId, ...props }: MessageAr
                                         ${isFirstInGroup && isCurrentUserSender ? 'mt-3' : ''}
                                     `}
                                 >
-                                    {/* Use whitespace-pre-wrap to respect newlines in messages */}
+
                                     <p className="text-base break-words whitespace-pre-wrap">{message.content}</p>
 
-                                    {/* Show timestamp only for the last message in a group */}
+
                                     {isLastInGroup && (
                                         <p className={`
                                             text-xs mt-1 text-right opacity-80
@@ -108,7 +105,7 @@ function MessageArea({ messages = [], setMessages, chatId, ...props }: MessageAr
                         );
                     })}
                 </div>
-                {/* This empty div is the target for our auto-scrolling ref */}
+
                 <div ref={messagesEndRef} />
             </div>
 

@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from "react";
 import axios from "axios";
 import toast from "react-hot-toast";
 import { Send, Loader2 } from 'lucide-react';
-import type { Message } from "../types/chat"; // Make sure path is correct
+import type { Message } from "../types/chat";
 
 const apiBaseUrl = import.meta.env.VITE_API_BASE;
 
@@ -16,26 +16,25 @@ function MessageInput({ chatId, setMessages }: MessageInputProps) {
     const [isSending, setIsSending] = useState(false);
     const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-    // --- Effect for auto-growing textarea ---
-    // This adjusts the textarea height based on its content.
+
     useEffect(() => {
         const textarea = textareaRef.current;
         if (textarea) {
-            textarea.style.height = 'auto'; // Reset height to recalculate
-            textarea.style.height = `${textarea.scrollHeight}px`; // Set to new content height
+            textarea.style.height = 'auto';
+            textarea.style.height = `${textarea.scrollHeight}px`;
         }
     }, [content]);
 
-    // --- Function to send the message via HTTP ---
+
     const sendMessage = () => {
-        if (!content.trim() || isSending) return; // Prevent sending empty or during submission
+        if (!content.trim() || isSending) return;
 
         setIsSending(true);
         axios
             .post(`${apiBaseUrl}/chat/sendMessage`, { content: content.trim(), chatId }, { withCredentials: true })
             .then((response) => {
-                setContent(""); // Clear input on success
-                // Update the parent component's message list with the new message from the server
+                setContent("");
+
                 setMessages((prev) => [...prev, response.data]);
             })
             .catch((err) => {
@@ -46,11 +45,11 @@ function MessageInput({ chatId, setMessages }: MessageInputProps) {
             });
     };
 
-    // --- Handler for keyboard events ---
+
     const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-        // Send message on 'Enter' but allow new lines with 'Shift + Enter'
+
         if (e.key === 'Enter' && !e.shiftKey) {
-            e.preventDefault(); // Prevents adding a new line in the textarea
+            e.preventDefault();
             sendMessage();
         }
     };

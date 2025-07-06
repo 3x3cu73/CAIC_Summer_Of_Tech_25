@@ -12,7 +12,7 @@ import { useUser } from "../../context/userContext.tsx";
 
 const apiBaseUrl = import.meta.env.VITE_API_BASE;
 
-// A helper component to generate consistent avatars from user/chat names
+
 const UserAvatar = ({ name, size = 'w-11 h-11' }: { name?: string, size?: string }) => {
     if (!name) return <div className={`${size} bg-slate-300 rounded-full`}></div>; // Changed: Darker placeholder for light theme
 
@@ -32,12 +32,12 @@ const UserAvatar = ({ name, size = 'w-11 h-11' }: { name?: string, size?: string
     );
 };
 
-// A skeleton loader for a better initial loading experience (Light Theme)
+
 const ChatListSkeleton = () => (
     <div className="px-3 space-y-3 mt-4">
         {[...Array(5)].map((_, i) => (
             <div key={i} className="flex items-center gap-3 animate-pulse">
-                {/* Changed: Skeleton uses lighter slate colors */}
+
                 <div className="w-11 h-11 bg-slate-200 rounded-full"></div>
                 <div className="flex-1">
                     <div className="h-4 bg-slate-200 rounded w-3/4"></div>
@@ -53,20 +53,20 @@ function Dashboard() {
     const { user, loading: userLoading } = useUser();
     const navigate = useNavigate();
 
-    // --- Component State ---
+
     const [chats, setChats] = useState<any[]>([]);
     const [currChat, setCurrChat] = useState<any>(null);
     const [messages, setMessages] = useState<any[]>([]);
     const [isChatLoading, setIsChatLoading] = useState<boolean>(true);
     const [searchQuery, setSearchQuery] = useState<string>('');
 
-    // --- Modal State ---
+
     const [isChatModalOpen, setIsChatModalOpen] = useState(false);
     const [allUsers, setAllUsers] = useState<any[]>([]);
     const [chatUsers, setChatUsers] = useState<any[]>([]);
     const [newChatName, setNewChatName] = useState<string>('');
 
-    // --- Effect for Auth Validation ---
+
     useEffect(() => {
         axios.post(`${apiBaseUrl}/auth/validate`, {}, { withCredentials: true })
             .catch(() => {
@@ -75,7 +75,7 @@ function Dashboard() {
             });
     }, [navigate]);
 
-    // --- Effect for Fetching Initial Chats ---
+
     useEffect(() => {
         if (!user?._id) return;
         setIsChatLoading(true);
@@ -90,7 +90,7 @@ function Dashboard() {
             .finally(() => setIsChatLoading(false));
     }, [user]);
 
-    // --- Effect for Fetching Messages for the Current Chat ---
+
     useEffect(() => {
         if (currChat?._id) {
             axios.post(`${apiBaseUrl}/chat/getMessages`, { chat: currChat._id }, { withCredentials: true })
@@ -101,7 +101,7 @@ function Dashboard() {
         }
     }, [currChat?._id]);
 
-    // --- Modal and Chat Creation Logic ---
+
     useEffect(() => {
         if (!userLoading && user) setChatUsers([user]);
     }, [userLoading, user]);
@@ -150,7 +150,7 @@ function Dashboard() {
             .catch(err => toast.error(err.response.data.message));
     };
 
-    // --- Logout ---
+
     const logOut = () => {
         axios.post(`${apiBaseUrl}/auth/logout`, {}, { withCredentials: true })
             .then(() => {
@@ -166,16 +166,15 @@ function Dashboard() {
 
     return (
         <div className="flex h-screen font-sans bg-slate-100">
-            {/* Sidebar (Light Theme) */}
-            {/* Changed: `bg-slate-800 text-slate-200` to `bg-white text-slate-800 border-r` for a light sidebar */}
+
             <aside className="flex flex-col w-96 bg-white text-slate-800 border-r border-slate-200">
-                {/* Changed: Border color and text color for light theme */}
+
                 <header className="flex items-center justify-between p-4 border-b border-slate-200 shadow-sm">
                     <div className="flex items-center gap-3">
                         <MessageSquarePlus className="text-indigo-500" size={28} />
                         <h1 className="text-xl font-bold tracking-wider text-slate-800">ChatApp</h1>
                     </div>
-                    {/* Changed: Button colors for light theme */}
+
                     <button onClick={handleOpenChatModal} className="p-2 rounded-full text-slate-500 hover:bg-slate-100 hover:text-indigo-500 transition-colors" title="Create New Chat">
                         <Plus size={22} />
                     </button>
@@ -184,7 +183,7 @@ function Dashboard() {
                 <div className="p-3 border-b border-slate-200">
                     <div className="relative">
                         <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
-                        {/* Changed: Input styling for light theme */}
+
                         <input type="text" placeholder="Search chats..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="w-full bg-slate-100 border border-transparent rounded-lg pl-10 pr-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white focus:border-indigo-500 text-slate-700 placeholder:text-slate-500 transition" />
                     </div>
                 </div>
@@ -199,21 +198,21 @@ function Dashboard() {
                     )}
                 </div>
 
-                {/* Changed: Border and text colors for light theme footer */}
+
                 <footer className="flex items-center gap-3 p-4 mt-auto border-t border-slate-200">
                     {!userLoading && user && <UserAvatar name={user.username} />}
                     <div className="flex-grow overflow-hidden">
                         <p className="font-semibold text-slate-700 truncate">{user?.username || 'Loading...'}</p>
                         <p className="text-xs text-green-500">Online</p>
                     </div>
-                    {/* Changed: Button colors for light theme, with a different hover color for distinction */}
+
                     <button onClick={logOut} title="Log Out" className="p-2 rounded-full text-slate-500 hover:bg-slate-100 hover:text-rose-500 transition-colors">
                         <LogOut size={20} />
                     </button>
                 </footer>
             </aside>
 
-            {/* Main Chat Window */}
+
             <main className="flex flex-col flex-grow">
                 {currChat ? (
                     <>
@@ -241,7 +240,7 @@ function Dashboard() {
                 )}
             </main>
 
-            {/* Create Chat Modal (already light-theme friendly) */}
+
             <Modal isOpen={isChatModalOpen} onClose={handleCloseChatModal} onSubmit={createChat} title="Create a New Chat">
                 <div className="space-y-4">
                     <input type="text" value={newChatName} onChange={(e) => setNewChatName(e.target.value)} placeholder="Enter chat name (e.g., Project Team)" className="w-full px-4 py-2 border border-slate-300 rounded-md focus:ring-2 focus:ring-indigo-500 outline-none bg-white text-slate-700" />

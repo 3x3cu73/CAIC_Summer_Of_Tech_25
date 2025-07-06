@@ -1,7 +1,7 @@
 import React from "react";
 import { useUser } from "../../context/userContext.tsx";
 
-// Using 'any' for the chat prop to match your original structure.
+
 type ChatProps = {
     chat: any;
     activeChat: boolean;
@@ -11,7 +11,7 @@ type ChatProps = {
 function Chat({ chat, activeChat, AvatarComponent, ...props }: ChatProps) {
     const { user } = useUser();
 
-    // --- YOUR ORIGINAL LOGIC - PRESERVED EXACTLY ---
+
     if (chat && !chat.isGroupChat) {
         const person = chat.participants?.find((p: any) => p.username !== user?.username);
         if (person) {
@@ -20,9 +20,9 @@ function Chat({ chat, activeChat, AvatarComponent, ...props }: ChatProps) {
     }
 
     if(chat) {
-        chat.unreadCount = 2; // This hardcoded value is preserved from your original code.
+        chat.unreadCount = 2;
     }
-    // --- END OF YOUR ORIGINAL LOGIC ---
+
 
     if (!chat) {
         return null;
@@ -38,14 +38,14 @@ function Chat({ chat, activeChat, AvatarComponent, ...props }: ChatProps) {
                 ${activeChat ? "bg-indigo-50" : "hover:bg-slate-100"}
             `}
         >
-            {/* Avatar (No change needed) */}
+
             <div className="flex-shrink-0">
                 {AvatarComponent}
             </div>
 
-            {/* Main Content Area */}
+
             <div className="flex-grow min-w-0">
-                {/* Top Row: Name and Unread Count */}
+
                 <div className="flex justify-between items-center">
                     <h3 className={`
                         font-semibold truncate pr-2
@@ -55,7 +55,7 @@ function Chat({ chat, activeChat, AvatarComponent, ...props }: ChatProps) {
                     `}>
                         {chat.name}
                     </h3>
-                    {/* Unread count badge styling works well on light backgrounds, so no changes needed. */}
+
                     {chat.unreadCount > 0 && (
                         <div className="flex-shrink-0 w-5 h-5 rounded-full bg-indigo-500 text-white text-xs flex items-center justify-center font-bold">
                             {chat.unreadCount}
@@ -63,11 +63,10 @@ function Chat({ chat, activeChat, AvatarComponent, ...props }: ChatProps) {
                     )}
                 </div>
 
-                {/* Bottom Row: Last Message Preview */}
+
                 <div className="mt-0.5">
                     {chat.latestMessage && (
-                        // --- THEME CHANGE ---
-                        // Light text colors replaced with darker, more readable grays for the light theme.
+
                         <div className="text-sm text-slate-500 truncate">
                             <span className="font-semibold text-slate-600">
                                 {chat.participants.find((p: any) => p._id === chat.latestMessage.sender)?.username}:
