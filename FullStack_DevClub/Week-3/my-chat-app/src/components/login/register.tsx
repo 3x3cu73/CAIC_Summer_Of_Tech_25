@@ -37,7 +37,7 @@ function Register({children}: Props) {
 
 
         axios.post(
-            `${apiBaseUrl}/register`,
+            `${apiBaseUrl}/auth/register`,
             {username, password,email},
             {
                 headers: {'Content-Type': 'application/json'},
@@ -45,8 +45,8 @@ function Register({children}: Props) {
             }
         )
             .then(res => {
-                console.log('Registered successful:', res.data);
-                toast.success('Registration successful');
+                // console.log('Registered successful:', res.data);
+                toast.success(res.data.message);
                 setTimeout(() => {
                     navigate('/');
                 }, 4000);
