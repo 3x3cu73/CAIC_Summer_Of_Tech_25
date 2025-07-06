@@ -19,8 +19,7 @@ function Dashboard() {
     const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
     const [currChat, setCurrChat] = useState<any>('');
     const [chats, setChats] = useState<any[]>([]);
-    const [Messages, setMessages] = useState<any[]>([]);
-
+    const [Messages, setMessages] =  useState<any[]>([]);
 
     //Modal Controller for Add New Chats
     const [chatUsers, setChatUsers] = useState<any[]>([]);
@@ -233,7 +232,7 @@ function Dashboard() {
                 </div>
 
                 <div className="flex flex-col w-9/12">
-                    <MessageArea messages={Messages}/>
+                    <MessageArea messages={Messages} chatId={currChat._id} setMessages={setMessages} />
                 </div>
             </div>
         </>

@@ -1,15 +1,18 @@
 import React from "react";
 import { useUser } from "../../context/userContext.tsx"; // Your user context hook
-import type { Message } from "../types/chat"; // Adjust path to your types file
+import type { Message } from "../types/chat";
+import MessageInput from "./messageInput.tsx"; // Adjust path to your types file
 
 
 
 // Props now expect an array of the new Message type
 type MessageAreaProps = {
     messages: Message[];
+    chatId: string;
+    setMessages: (updater: (prev: Message[]) => Message[]) => void;
 } & React.HTMLAttributes<HTMLDivElement>;
 
-function MessageArea({ messages = [], ...props }: MessageAreaProps) {
+function MessageArea({ messages = [],setMessages,chatId, ...props }: MessageAreaProps) {
     // Get the currently logged-in user from your context
     const { user } = useUser();
 
@@ -26,13 +29,13 @@ function MessageArea({ messages = [], ...props }: MessageAreaProps) {
     }
 
     return (
-        // Main scrollable container for all messages
+        <>
         <div
             {...props}
             className="flex flex-col flex-grow p-4 overflow-y-auto bg-gray-50 space-y-4"
         >
             {messages.map((message) => {
-                // Check if the message was sent by the currently logged-in user
+
                 const isCurrentUserSender = message.sender._id === user._id;
 
                 return (
@@ -70,7 +73,10 @@ function MessageArea({ messages = [], ...props }: MessageAreaProps) {
                     </div>
                 );
             })}
+
         </div>
+<MessageInput chatId={chatId} setMessages={setMessages} />
+        </>
     );
 }
 

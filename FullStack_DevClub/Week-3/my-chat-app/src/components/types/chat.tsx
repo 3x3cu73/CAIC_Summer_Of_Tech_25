@@ -6,13 +6,14 @@ export interface Sender {
 }
 
 // Type for the message object, using the Sender type
-export interface Message {
+export type Message = {
     _id: string;
-    sender: Sender;
     content: string;
     chat: string;
-    seenBy: string[];
-    createdAt: string; // ISO date string
-    updatedAt: string; // ISO date string
-    __v?: number;
-}
+    sender: {
+        _id: string;
+        username: string;
+    };
+    createdAt: string;
+    updatedAt: string;
+};

@@ -31,7 +31,7 @@ exports.sendMessage = async (req, res) => {
 
         await Chat.findByIdAndUpdate(chatId, { latestMessage: newMessage._id });
 
-        req.io.to(chatId).emit('receiveMessage', newMessage);npm
+        req.io.to(chatId).emit('receiveMessage', newMessage);
 
 
         res.status(200).json(newMessage);
