@@ -3,12 +3,20 @@ import { useUser } from "../../context/userContext.tsx";
 import type { Message } from "../types/chat";
 import MessageInput from "./messageInput.tsx";
 import { Loader2 } from "lucide-react";
-``
+import {useSocket} from "../../context/socketHandler.tsx";
+
 
 type MessageAreaProps = {
     messages: Message[];
     chatId: string;
-    setMessages: (updater: (prev: Message[]) => Message[]) => void;
+    setMessages: (updater: (prev: any) => (Message | {
+        chat: any;
+        _id?: string;
+        content?: string;
+        sender?: { _id: string; username: string };
+        createdAt?: string;
+        updatedAt?: string
+    })[]) => void;
 } & React.HTMLAttributes<HTMLDivElement>;
 
 function MessageArea({ messages = [], setMessages, chatId, ...props }: MessageAreaProps) {
@@ -24,6 +32,45 @@ function MessageArea({ messages = [], setMessages, chatId, ...props }: MessageAr
     useEffect(() => {
         scrollToBottom();
     }, [messages]);
+
+
+    const socket = useSocket();
+    useEffect(() => {
+        if (!socket || !chatId) {
+            console.warn("Socket or chatId missing");
+            return;
+        }
+
+        socket.emit("joinChat", chatId, (response: any) => {
+            console.log("Acknowledgment received:", response);
+
+            if (response?.success) {
+                console.log("Joined Chat:", chatId);
+            } else {
+                console.error("Failed to join chat:", response?.message || "Unknown error");
+            }
+        });
+
+        return () => {
+            socket.emit("leaveChat", chatId);
+        };
+    }, [socket, chatId]);
+
+    useEffect(() => {
+        if (!socket) return;
+
+        const handler = (msg: { chat: any; _id?: string; content?: string; sender?: { _id: string; username: string; }; createdAt?: string; updatedAt?: string; }) => {
+            if (msg.chat._id === chatId) {
+                setMessages(prev => [...prev, msg]);
+            }
+        };
+
+        socket.on("receiveMessage", handler);
+
+        return () => {
+            socket.off("receiveMessage", handler);
+        };
+    }, [socket, chatId]);
 
 
     const formatTime = (dateString: string) => {
@@ -49,7 +96,7 @@ function MessageArea({ messages = [], setMessages, chatId, ...props }: MessageAr
                     {messages.map((message, index) => {
                         const isCurrentUserSender = message.sender._id === user._id;
 
-                        // --- Logic for grouping consecutive messages from the same sender ---
+
                         const prevMessage = messages[index - 1];
                         const nextMessage = messages[index + 1];
 

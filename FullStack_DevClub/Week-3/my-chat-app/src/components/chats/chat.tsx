@@ -1,7 +1,6 @@
 import React from "react";
 import { useUser } from "../../context/userContext.tsx";
 
-
 type ChatProps = {
     chat: any;
     activeChat: boolean;
@@ -10,8 +9,6 @@ type ChatProps = {
 
 function Chat({ chat, activeChat, AvatarComponent, ...props }: ChatProps) {
     const { user } = useUser();
-
-
     if (chat && !chat.isGroupChat) {
         const person = chat.participants?.find((p: any) => p.username !== user?.username);
         if (person) {

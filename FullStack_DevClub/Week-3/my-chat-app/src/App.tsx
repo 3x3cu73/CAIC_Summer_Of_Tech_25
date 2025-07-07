@@ -5,20 +5,24 @@ import Login from "./components/login/login.tsx";
 import Dashboard from "./components/dashboard/dashboard.tsx";
 import {Toaster} from "react-hot-toast";
 import ResetPassword from "./components/login/passReset.tsx";
+import {SocketProvider} from "./context/socketHandler.tsx";
 import {UserProvider} from "./context/userContext.tsx";
 
 function App() {
+
 
     return (
         <>
             <Toaster position="top-center" reverseOrder={false}/>
             <UserProvider>
-                <Routes>
-                    <Route path="/" element={<Dashboard/>}/>
-                    <Route path="/register" element={<Register/>}/>
-                    <Route path="/login" element={<Login/>}/>
-                    <Route path="/reset-password" element={<ResetPassword/>}/>
-                </Routes>
+                <SocketProvider>
+                    <Routes>
+                        <Route path="/" element={<Dashboard/>}/>
+                        <Route path="/register" element={<Register/>}/>
+                        <Route path="/login" element={<Login/>}/>
+                        <Route path="/reset-password" element={<ResetPassword/>}/>
+                    </Routes>
+                </SocketProvider>
             </UserProvider>
 
         </>

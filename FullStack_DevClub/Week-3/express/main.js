@@ -13,21 +13,26 @@ const PORT = 3000;
 //Cookie Parser
 const cookieParser = require('cookie-parser');
 const {createServer} = require("node:http");
+const initializeSocketIO = require("./projects/chatApp/middlewares/socketHandler");
 const server = createServer(app)
 
 const io = new Server(server, {
+  path : "/chatApp/socket.io",
   cors: {
     origin: process.env.FRONTEND_URL,
     methods: ["GET", "POST"],
     credentials: true,
   },
 })
+
+
+initializeSocketIO(io);
+
 app.use((req, res, next) => {
   req.io = io;
   next();
 });
 app.use(cookieParser());
-
 
 dotenv.config();
 
@@ -35,7 +40,6 @@ dotenv.config();
 connectDB();
 
 app.use(bodyParser.json());
-
 
 app.use(cors({
   origin: true,
@@ -47,9 +51,6 @@ app.use(cors({
 //API Routes
 app.use('/nginx', nginxRoute);
 app.use('/chatApp',chatApp);
-// app.listen(PORT, () => {
-//   console.log(`Server running at http://localhost:${PORT}`);
-// });
 
 server.listen(PORT, () => {
   console.log(`Server running at http://localhost:${PORT}`);
