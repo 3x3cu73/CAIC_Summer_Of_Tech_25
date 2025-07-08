@@ -8,5 +8,3 @@
 - Email notification comes on Registration
 - Email based Password reset
 - Multi User Chat App with Group and Private Chatss
-
-# Socket Io Implementation Left
