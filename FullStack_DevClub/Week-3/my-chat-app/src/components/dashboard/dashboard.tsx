@@ -3,7 +3,6 @@ import { LogOut, Plus, Search, Users, MessageSquarePlus, Video, VideoOff, X } fr
 import axios from 'axios';
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
-
 import Chat from "../chats/chat.tsx";
 import MessageArea from "../chats/messageArea.tsx";
 import Modal from "../modal/modal.tsx";
