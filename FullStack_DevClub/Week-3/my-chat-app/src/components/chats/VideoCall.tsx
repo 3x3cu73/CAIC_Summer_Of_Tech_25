@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { LiveKitRoom, VideoConference } from '@livekit/components-react';
 import { useSocket } from '../../context/socketHandler.js';
 import { useUser } from '../../context/userContext.js';
