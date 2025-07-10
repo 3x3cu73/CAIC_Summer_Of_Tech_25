@@ -44,6 +44,7 @@ const ChatListSkeleton = () => (
     </div>
 );
 
+// @ts-ignore
 const VideoCallModal = ({ chat, onClose }) => (
     <div
         className="absolute inset-0 bg-black/70 backdrop-blur-sm z-40 flex items-center justify-center p-2 sm:p-4 transition-opacity duration-300"
