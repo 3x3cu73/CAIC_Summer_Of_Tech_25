@@ -9,13 +9,12 @@ import MessageArea from "../chats/messageArea.tsx";
 import Modal from "../modal/modal.tsx";
 import AddUser from "../chats/addUser.tsx";
 import { useUser } from "../../context/userContext.tsx";
-import VideoCall  from "../chats/VideoCall.tsx";
+import VideoCall from "../chats/VideoCall.tsx";
 
 const apiBaseUrl = import.meta.env.VITE_API_BASE;
 
 const UserAvatar = ({ name, size = 'w-11 h-11' }: { name?: string, size?: string }) => {
     if (!name) return <div className={`${size} bg-slate-300 rounded-full`}></div>;
-
     const initial = name.charAt(0).toUpperCase();
     const colorIndex = name.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0) % 5;
     const colors = [
