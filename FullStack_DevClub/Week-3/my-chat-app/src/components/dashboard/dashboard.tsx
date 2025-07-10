@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { LogOut, Plus, Search, Users, MessageSquarePlus, Video, VideoOff } from 'lucide-react';
+import { LogOut, Plus, Search, Users, MessageSquarePlus, Video, VideoOff, X } from 'lucide-react';
 import axios from 'axios';
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
@@ -44,6 +44,35 @@ const ChatListSkeleton = () => (
         ))}
     </div>
 );
+
+const VideoCallModal = ({ chat, onClose }) => (
+    <div
+        className="absolute inset-0 bg-black/70 backdrop-blur-sm z-40 flex items-center justify-center p-2 sm:p-4 transition-opacity duration-300"
+        style={{ animation: 'fadeIn 0.3s ease-out' }}
+    >
+        <div className="relative w-full h-full max-w-7xl bg-slate-900 rounded-2xl shadow-2xl flex flex-col overflow-hidden">
+            <header className="flex items-center justify-between p-3 border-b border-slate-700 flex-shrink-0">
+                <div className="flex items-center gap-3">
+                    <Video className="text-indigo-400" size={20} />
+                    <h3 className="font-bold text-white truncate">
+                        <span className="hidden sm:inline">Video Call: </span>{chat.name}
+                    </h3>
+                </div>
+                <button
+                    onClick={onClose}
+                    className="flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-lg transition-colors bg-red-500 text-white hover:bg-red-600"
+                >
+                    <X size={18} />
+                    <span className="hidden sm:inline">Leave Call</span>
+                </button>
+            </header>
+            <div className="flex-1 min-h-0">
+                {chat && <VideoCall chat={chat} />}
+            </div>
+        </div>
+    </div>
+);
+
 
 function Dashboard() {
     const { user, loading: userLoading } = useUser();
@@ -174,7 +203,7 @@ function Dashboard() {
 
     return (
         <div className="flex h-screen font-sans bg-slate-100">
-            <aside className="flex flex-col w-96 bg-white text-slate-800 border-r border-slate-200">
+            <aside className="flex flex-col w-full md:w-80 lg:w-96 bg-white text-slate-800 border-r border-slate-200">
                 <header className="flex items-center justify-between p-4 border-b border-slate-200 shadow-sm">
                     <div className="flex items-center gap-3">
                         <MessageSquarePlus className="text-indigo-500" size={28} />
@@ -210,7 +239,7 @@ function Dashboard() {
                     </button>
                 </footer>
             </aside>
-            <main className="flex flex-col flex-grow">
+            <main className="flex-col flex-grow hidden md:flex relative">
                 {currChat ? (
                     <>
                         <header className="flex items-center justify-between gap-4 p-4 bg-white border-b border-slate-200 shadow-sm">
@@ -236,22 +265,19 @@ function Dashboard() {
                                 <span>{isVideoCallActive ? 'Leave Call' : 'Join Call'}</span>
                             </button>
                         </header>
-                        <div className="flex flex-grow overflow-hidden">
-                            <div className={`flex flex-col h-full transition-all duration-300 ${isVideoCallActive ? 'w-full md:w-1/2' : 'w-full'}`}>
-                                <MessageArea messages={messages} chat={currChat} setMessages={setMessages} />
-                            </div>
-                            {isVideoCallActive && (
-                                <div className="hidden md:block w-1/2 h-full border-l border-slate-200 bg-slate-900">
-                                    <VideoCall chat={currChat} />
-                                </div>
-                            )}
+                        <div className="flex flex-col flex-grow overflow-hidden">
+                            <MessageArea messages={messages} chat={currChat} setMessages={setMessages} />
                         </div>
+
+                        {isVideoCallActive && (
+                            <VideoCallModal chat={currChat} onClose={() => setVideoCallActive(false)} />
+                        )}
                     </>
                 ) : (
                     <div className="flex flex-col items-center justify-center h-full text-center bg-slate-50">
                         <UserAvatar name="ChatApp" size="w-24 h-24" />
                         <h2 className="mt-6 text-2xl font-semibold text-slate-700">Welcome to ChatApp</h2>
-                        <p className="mt-2 text-slate-500">Select a chat from the sidebar to start messaging.</p>
+                        <p className="mt-2 text-slate-500">Select a chat to start messaging.</p>
                         <button onClick={handleOpenChatModal} className="mt-6 flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg font-semibold hover:bg-indigo-700 transition-colors shadow-sm hover:shadow-md">
                             <Plus size={20} /> Create a New Chat
                         </button>
