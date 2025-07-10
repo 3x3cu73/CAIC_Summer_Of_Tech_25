@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { LogOut, Plus, Search, Users, MessageSquarePlus } from 'lucide-react';
+import { LogOut, Plus, Search, Users, MessageSquarePlus, Video, VideoOff } from 'lucide-react';
 import axios from 'axios';
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
@@ -9,12 +9,12 @@ import MessageArea from "../chats/messageArea.tsx";
 import Modal from "../modal/modal.tsx";
 import AddUser from "../chats/addUser.tsx";
 import { useUser } from "../../context/userContext.tsx";
+import VideoCall  from "../chats/VideoCall.tsx";
 
 const apiBaseUrl = import.meta.env.VITE_API_BASE;
 
-
 const UserAvatar = ({ name, size = 'w-11 h-11' }: { name?: string, size?: string }) => {
-    if (!name) return <div className={`${size} bg-slate-300 rounded-full`}></div>; // Changed: Darker placeholder for light theme
+    if (!name) return <div className={`${size} bg-slate-300 rounded-full`}></div>;
 
     const initial = name.charAt(0).toUpperCase();
     const colorIndex = name.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0) % 5;
@@ -32,12 +32,10 @@ const UserAvatar = ({ name, size = 'w-11 h-11' }: { name?: string, size?: string
     );
 };
 
-
 const ChatListSkeleton = () => (
     <div className="px-3 space-y-3 mt-4">
         {[...Array(5)].map((_, i) => (
             <div key={i} className="flex items-center gap-3 animate-pulse">
-
                 <div className="w-11 h-11 bg-slate-200 rounded-full"></div>
                 <div className="flex-1">
                     <div className="h-4 bg-slate-200 rounded w-3/4"></div>
@@ -48,10 +46,20 @@ const ChatListSkeleton = () => (
     </div>
 );
 
-
 function Dashboard() {
     const { user, loading: userLoading } = useUser();
     const navigate = useNavigate();
+
+    const [chats, setChats] = useState<any[]>([]);
+    const [currChat, setCurrChat] = useState<any>(null);
+    const [messages, setMessages] = useState<any[]>([]);
+    const [isChatLoading, setIsChatLoading] = useState<boolean>(true);
+    const [searchQuery, setSearchQuery] = useState<string>('');
+    const [isVideoCallActive, setVideoCallActive] = useState(false);
+    const [isChatModalOpen, setIsChatModalOpen] = useState(false);
+    const [allUsers, setAllUsers] = useState<any[]>([]);
+    const [chatUsers, setChatUsers] = useState<any[]>([]);
+    const [newChatName, setNewChatName] = useState<string>('');
 
     useEffect(() => {
         if (!userLoading && !user?.username) {
@@ -64,20 +72,6 @@ function Dashboard() {
         }
     }, [userLoading, user]);
 
-
-    const [chats, setChats] = useState<any[]>([]);
-    const [currChat, setCurrChat] = useState<any>(null);
-    const [messages, setMessages] = useState<any[]>([]);
-    const [isChatLoading, setIsChatLoading] = useState<boolean>(true);
-    const [searchQuery, setSearchQuery] = useState<string>('');
-
-
-    const [isChatModalOpen, setIsChatModalOpen] = useState(false);
-    const [allUsers, setAllUsers] = useState<any[]>([]);
-    const [chatUsers, setChatUsers] = useState<any[]>([]);
-    const [newChatName, setNewChatName] = useState<string>('');
-
-
     useEffect(() => {
         axios.post(`${apiBaseUrl}/auth/validate`, {}, { withCredentials: true })
             .catch(() => {
@@ -86,14 +80,12 @@ function Dashboard() {
             });
     }, [navigate]);
 
-    // Extract fetchChats into a separate function
     const fetchChats = () => {
         if (!user?._id) return;
         setIsChatLoading(true);
         axios.post(`${apiBaseUrl}/chat/getChats`, {}, { withCredentials: true })
             .then((response) => {
                 setChats(response.data);
-                // Only set the first chat as current if no chat is currently selected
                 if (response.data.length > 0 && !currChat) {
                     setCurrChat(response.data[0]);
                 }
@@ -106,7 +98,6 @@ function Dashboard() {
         fetchChats();
     }, [user]);
 
-
     useEffect(() => {
         if (currChat?._id) {
             axios.post(`${apiBaseUrl}/chat/getMessages`, { chat: currChat._id }, { withCredentials: true })
@@ -116,7 +107,6 @@ function Dashboard() {
             setMessages([]);
         }
     }, [currChat?._id]);
-
 
     useEffect(() => {
         if (!userLoading && user) setChatUsers([user]);
@@ -152,17 +142,13 @@ function Dashboard() {
             toast.error("Please provide a chat name and select at least one other member.");
             return;
         }
-        axios.post(`${apiBaseUrl}/chat/newChat`, {
-            name: newChatName,
-            participants: chatUsers.map(user => user._id),
-        }, { withCredentials: true })
+        axios.post(`${apiBaseUrl}/chat/newChat`, { name: newChatName, participants: chatUsers.map(user => user._id) }, { withCredentials: true })
             .then(res => {
                 toast.success(res.data.message);
                 const newChat = res.data.chat;
                 setCurrChat(newChat);
                 handleCloseChatModal();
                 setChats(prev => [newChat, ...prev]);
-
             })
             .catch(err => toast.error(err.response.data.message));
     };
@@ -176,73 +162,91 @@ function Dashboard() {
             .catch((error) => console.error('Logout Error:', error));
     };
 
+    const handleChatSelect = (chat: any) => {
+        if (currChat?._id !== chat._id) {
+            setVideoCallActive(false);
+        }
+        setCurrChat(chat);
+    };
+
     const filteredChats = chats.filter(chat =>
         chat?.name.toLowerCase().includes(searchQuery.toLowerCase())
     );
 
     return (
         <div className="flex h-screen font-sans bg-slate-100">
-
             <aside className="flex flex-col w-96 bg-white text-slate-800 border-r border-slate-200">
-
                 <header className="flex items-center justify-between p-4 border-b border-slate-200 shadow-sm">
                     <div className="flex items-center gap-3">
                         <MessageSquarePlus className="text-indigo-500" size={28} />
                         <h1 className="text-xl font-bold tracking-wider text-slate-800">ChatApp</h1>
                     </div>
-
                     <button onClick={handleOpenChatModal} className="p-2 rounded-full text-slate-500 hover:bg-slate-100 hover:text-indigo-500 transition-colors" title="Create New Chat">
                         <Plus size={22} />
                     </button>
                 </header>
-
                 <div className="p-3 border-b border-slate-200">
                     <div className="relative">
                         <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
-
                         <input type="text" placeholder="Search chats..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="w-full bg-slate-100 border border-transparent rounded-lg pl-10 pr-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white focus:border-indigo-500 text-slate-700 placeholder:text-slate-500 transition" />
                     </div>
                 </div>
-
                 <div className="flex-grow overflow-y-auto">
                     {isChatLoading ? <ChatListSkeleton /> : (
                         <div className="px-3 space-y-1 py-2">
                             {filteredChats.map((chat: any) => (
-                                <Chat key={chat._id} chat={chat} onClick={() => setCurrChat(chat)} activeChat={currChat?._id === chat._id} AvatarComponent={<UserAvatar name={chat.name} />} />
+                                <Chat key={chat._id} chat={chat} onClick={() => handleChatSelect(chat)} activeChat={currChat?._id === chat._id} AvatarComponent={<UserAvatar name={chat.name} />} />
                             ))}
                         </div>
                     )}
                 </div>
-
-
                 <footer className="flex items-center gap-3 p-4 mt-auto border-t border-slate-200">
                     {!userLoading && user && <UserAvatar name={user.username} />}
                     <div className="flex-grow overflow-hidden">
                         <p className="font-semibold text-slate-700 truncate">{user?.username || 'Loading...'}</p>
                         <p className="text-xs text-green-500">Online</p>
                     </div>
-
                     <button onClick={logOut} title="Log Out" className="p-2 rounded-full text-slate-500 hover:bg-slate-100 hover:text-rose-500 transition-colors">
                         <LogOut size={20} />
                     </button>
                 </footer>
             </aside>
-
-
             <main className="flex flex-col flex-grow">
                 {currChat ? (
                     <>
-                        <header className="flex items-center gap-4 p-4 bg-white border-b border-slate-200 shadow-sm">
-                            <UserAvatar name={currChat.name} />
-                            <div>
-                                <h2 className="text-lg font-bold text-slate-800">{currChat.name}</h2>
-                                <div className="flex items-center gap-1 text-sm text-slate-500">
-                                    <Users size={14} />
-                                    <span>{currChat.participants.length} Members</span>
+                        <header className="flex items-center justify-between gap-4 p-4 bg-white border-b border-slate-200 shadow-sm">
+                            <div className="flex items-center gap-4">
+                                <UserAvatar name={currChat.name} />
+                                <div>
+                                    <h2 className="text-lg font-bold text-slate-800">{currChat.name}</h2>
+                                    <div className="flex items-center gap-1 text-sm text-slate-500">
+                                        <Users size={14} />
+                                        <span>{currChat.participants.length} Members</span>
+                                    </div>
                                 </div>
                             </div>
+                            <button
+                                onClick={() => setVideoCallActive(prev => !prev)}
+                                className={`flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-lg transition-all ${
+                                    isVideoCallActive
+                                        ? 'bg-red-100 text-red-700 hover:bg-red-200'
+                                        : 'bg-indigo-100 text-indigo-700 hover:bg-indigo-200'
+                                }`}
+                            >
+                                {isVideoCallActive ? <VideoOff size={18} /> : <Video size={18} />}
+                                <span>{isVideoCallActive ? 'Leave Call' : 'Join Call'}</span>
+                            </button>
                         </header>
-                        <MessageArea messages={messages} chatId={currChat._id} setMessages={setMessages} />
+                        <div className="flex flex-grow overflow-hidden">
+                            <div className={`flex flex-col h-full transition-all duration-300 ${isVideoCallActive ? 'w-full md:w-1/2' : 'w-full'}`}>
+                                <MessageArea messages={messages} chat={currChat} setMessages={setMessages} />
+                            </div>
+                            {isVideoCallActive && (
+                                <div className="hidden md:block w-1/2 h-full border-l border-slate-200 bg-slate-900">
+                                    <VideoCall chat={currChat} />
+                                </div>
+                            )}
+                        </div>
                     </>
                 ) : (
                     <div className="flex flex-col items-center justify-center h-full text-center bg-slate-50">
@@ -255,8 +259,6 @@ function Dashboard() {
                     </div>
                 )}
             </main>
-
-
             <Modal isOpen={isChatModalOpen} onClose={handleCloseChatModal} onSubmit={createChat} title="Create a New Chat">
                 <div className="space-y-4">
                     <input type="text" value={newChatName} onChange={(e) => setNewChatName(e.target.value)} placeholder="Enter chat name (e.g., Project Team)" className="w-full px-4 py-2 border border-slate-300 rounded-md focus:ring-2 focus:ring-indigo-500 outline-none bg-white text-slate-700" />

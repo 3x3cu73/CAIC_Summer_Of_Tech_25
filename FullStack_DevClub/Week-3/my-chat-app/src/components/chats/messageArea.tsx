@@ -8,7 +8,7 @@ import {useSocket} from "../../context/socketHandler.tsx";
 
 type MessageAreaProps = {
     messages: Message[];
-    chatId: string;
+    chat:any;
     setMessages: (updater: (prev: any) => (Message | {
         chat: any;
         _id?: string;
@@ -19,11 +19,11 @@ type MessageAreaProps = {
     })[]) => void;
 } & React.HTMLAttributes<HTMLDivElement>;
 
-function MessageArea({ messages = [], setMessages, chatId, ...props }: MessageAreaProps) {
+function MessageArea({ messages = [], setMessages,chat, ...props }: MessageAreaProps) {
     const { user, loading: userLoading } = useUser();
     const messagesEndRef = useRef<null | HTMLDivElement>(null);
 
-
+    const chatId = chat._id;
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
     };
