@@ -7,7 +7,7 @@ import {
     useRoomContext,
     useParticipants
 } from '@livekit/components-react';
-import { Track, RoomEvent, LocalTrackPublication } from 'livekit-client';
+import { Track, RoomEvent } from 'livekit-client';
 import { Loader2, AlertTriangle, MonitorUp, MonitorX, Mic, MicOff, Video, VideoOff, Phone } from 'lucide-react';
 import { useSocket } from '../../context/socketHandler.js';
 import { useUser } from '../../context/userContext.js';
@@ -19,57 +19,32 @@ const CallOverlay = ({ children }: { children: React.ReactNode }) => (
 );
 
 const ShareScreenButton = () => {
-    const { localParticipant } = useLocalParticipant();
-    // State to track if screen sharing is currently active
-    const [isScreenSharing, setIsScreenSharing] = useState(false);
-    // State to hold the screen share track publications
-    const [screenSharePublications, setScreenSharePublications] = useState<LocalTrackPublication[]>([]);
+    const { localParticipant, isScreenShareEnabled } = useLocalParticipant();
 
     const toggleScreenShare = useCallback(async () => {
         if (!localParticipant) return;
 
-        // If currently screen sharing, stop it
-        if (isScreenSharing) {
-            // Iterate over the stored publications
-            for (const publication of screenSharePublications) {
-                // *** FIX: Check if the track exists before unpublishing ***
-                if (publication.track) {
-                    await localParticipant.unpublishTrack(publication.track);
-                }
-            }
-            setScreenSharePublications([]);
-            setIsScreenSharing(false);
-        } else {
-            // If not screen sharing, start it
-            try {
-                // Create screen tracks, including audio
-                const tracks = await localParticipant.createScreenTracks({ audio: true });
-                const publications = [];
-                // Publish each track and store the publication
-                for (const track of tracks) {
-                    const publication = await localParticipant.publishTrack(track);
-                    publications.push(publication);
-                }
-                setScreenSharePublications(publications);
-                setIsScreenSharing(true);
-            } catch (err) {
-                console.error('Failed to start screen share:', err);
-            }
+        try {
+            // The `setScreenShareEnabled` method handles both starting and stopping the screen share.
+            // We pass `true` to start sharing and `false` to stop.
+            // The second argument is an options object where we can request to capture audio along with the screen.
+            await localParticipant.setScreenShareEnabled(!isScreenShareEnabled, { audio: true });
+        } catch (err) {
+            console.error('Failed to toggle screen share:', err);
         }
-    }, [isScreenSharing, localParticipant, screenSharePublications]);
-
+    }, [localParticipant, isScreenShareEnabled]);
 
     return (
         <button
             onClick={toggleScreenShare}
             className={`px-3 py-2 text-sm font-medium rounded-lg flex items-center gap-2 transition-colors ${
-                isScreenSharing
+                isScreenShareEnabled
                     ? 'bg-red-500 hover:bg-red-600 text-white'
                     : 'bg-indigo-600 hover:bg-indigo-700 text-white'
             }`}
         >
-            {isScreenSharing ? <MonitorX size={16} /> : <MonitorUp size={16} />}
-            {isScreenSharing ? 'Stop Share' : 'Share Screen'}
+            {isScreenShareEnabled ? <MonitorX size={16} /> : <MonitorUp size={16} />}
+            {isScreenShareEnabled ? 'Stop Share' : 'Share Screen'}
         </button>
     );
 };
