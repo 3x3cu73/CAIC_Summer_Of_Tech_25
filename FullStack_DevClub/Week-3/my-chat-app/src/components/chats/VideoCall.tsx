@@ -18,6 +18,7 @@ const CallOverlay = ({ children }: { children: React.ReactNode }) => (
     </div>
 );
 
+//  built-in LiveKit methods for simple  screen share management.
 const ShareScreenButton = () => {
     const { localParticipant, isScreenShareEnabled } = useLocalParticipant();
 
@@ -25,9 +26,8 @@ const ShareScreenButton = () => {
         if (!localParticipant) return;
 
         try {
-            // The `setScreenShareEnabled` method handles both starting and stopping the screen share.
-            // We pass `true` to start sharing and `false` to stop.
-            // The second argument is an options object where we can request to capture audio along with the screen.
+            // The setScreenShareEnabled method handles all the complex track publishing/unpublishing logic internally.
+            // We simply tell it to enable or disable screen sharing.
             await localParticipant.setScreenShareEnabled(!isScreenShareEnabled, { audio: true });
         } catch (err) {
             console.error('Failed to toggle screen share:', err);
@@ -132,7 +132,6 @@ const ParticipantTile = ({ trackRef }: { trackRef: any }) => {
     );
 };
 
-
 const VideoGrid = () => {
     const tracks = useTracks(
         [Track.Source.Camera, Track.Source.ScreenShare],
@@ -201,7 +200,6 @@ const VideoGrid = () => {
     );
 };
 
-
 const RoomContent = ({ onLeave }: { onLeave: () => void }) => {
     const room = useRoomContext();
     const [isConnected, setIsConnected] = useState(false);
@@ -238,6 +236,7 @@ const RoomContent = ({ onLeave }: { onLeave: () => void }) => {
     );
 };
 
+
 function VideoCall({ chat }: { chat: { _id: string; name: string } }) {
     const [token, setToken] = useState<string | null>(null);
     const [error, setError] = useState<string | null>(null);
@@ -249,6 +248,7 @@ function VideoCall({ chat }: { chat: { _id: string; name: string } }) {
     const socket = useSocket();
     const { user } = useUser();
 
+    // This function now just handles the *intent* to join a call.
     const handleJoinWithOptions = useCallback(() => {
         if (!socket || !user || !chat) return;
 
@@ -267,15 +267,17 @@ function VideoCall({ chat }: { chat: { _id: string; name: string } }) {
                 setIsLoading(false);
                 if (response.success && response.token) {
                     setToken(response.token);
-                    setIsInCall(true);
+                    setIsInCall(true); // Setting this to true will render the <LiveKitRoom>
                 } else {
                     setError(response.message || 'Failed to get video token.');
-                    setShowOptions(true);
+                    setShowOptions(true); // On failure, show options again.
                 }
             }
         );
     }, [socket, user, chat]);
 
+    // This function handles the user clicking the leave button.
+    // It immediately resets the state to exit the call UI.
     const handleLeaveCall = useCallback(() => {
         setToken(null);
         setIsInCall(false);
@@ -288,18 +290,12 @@ function VideoCall({ chat }: { chat: { _id: string; name: string } }) {
         setShowOptions(true);
     }, []);
 
+    // The unmounting of <LiveKitRoom> will handle the actual disconnection.
     useEffect(() => {
         if (!socket || !chat?._id || !user?._id) {
             setError("Missing required data. Please refresh and try again.");
-            return;
         }
-
-        return () => {
-            if (isInCall) {
-                handleLeaveCall();
-            }
-        };
-    }, [socket, user, chat, isInCall, handleLeaveCall]);
+    }, [socket, user, chat]);
 
     const serverUrl = import.meta.env.VITE_LIVEKIT_URL;
     const turnUrl = import.meta.env.VITE_TURN_URL;
@@ -374,6 +370,7 @@ function VideoCall({ chat }: { chat: { _id: string; name: string } }) {
                 </CallOverlay>
             )}
 
+            {/* This block is only rendered when we have a token and are in a call */}
             {token && isInCall && serverUrl && (
                 <LiveKitRoom
                     token={token}
@@ -394,6 +391,7 @@ function VideoCall({ chat }: { chat: { _id: string; name: string } }) {
                     audio={publishAudio}
                     data-lk-theme="default"
                     style={{ height: '100%', width: '100%' }}
+                    // Use onDisconnected for reliable cleanup. This is called when the room connection is cut
                     onDisconnected={handleLeaveCall}
                 >
                     <RoomContent onLeave={handleLeaveCall} />
