@@ -36,8 +36,12 @@ function MessageArea({ messages = [], setMessages,chat, ...props }: MessageAreaP
 
     const socket = useSocket();
     useEffect(() => {
-        if (!socket || !chatId) {
-            console.warn("Socket or chatId missing");
+        if (!socket ) {
+            console.warn("Socket missing");
+            return;
+        }
+        if (!chatId){
+            console.warn("No chatId found.");
             return;
         }
 
