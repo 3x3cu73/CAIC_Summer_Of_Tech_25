@@ -1,13 +1,17 @@
-const {registerUser,loginUser,sendResetMail, resetPassword, validateUser, logOut} = require("../controllers/authController");
 const router = require('express').Router();
+const authDB = require('../config/db')(); // Connection-scoped
 
+const User = require('../models/User')(authDB);
+const PasswordResetToken = require('../models/PasswordResetToken')(authDB);
 
-router.post('/register', registerUser);
-router.post('/login', loginUser);
-router.post('/sendResetMail', sendResetMail);
-router.post('/resetPassword', resetPassword);
-router.post('/validate', validateUser);
-router.post('/logout', logOut);
+// Inject models into controller
+const authController = require('../controllers/authController')({ User, PasswordResetToken });
 
+router.post('/register', authController.registerUser);
+router.post('/login', authController.loginUser);
+router.post('/sendResetMail', authController.sendResetMail);
+router.post('/resetPassword', authController.resetPassword);
+router.post('/validate', authController.validateUser);
+router.post('/logout', authController.logOut);
 
 module.exports = router;

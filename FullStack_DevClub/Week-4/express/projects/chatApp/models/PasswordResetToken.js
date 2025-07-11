@@ -6,4 +6,4 @@ const passwordResetTokenSchema = new mongoose.Schema({
     createdAt: { type: Date, default: Date.now, expires: 3600 } // 1hr expiry
 }, { timestamps: false });
 
-module.exports = mongoose.model('PasswordResetToken', passwordResetTokenSchema);
+module.exports = (conn)=>conn.model('PasswordResetToken', passwordResetTokenSchema);

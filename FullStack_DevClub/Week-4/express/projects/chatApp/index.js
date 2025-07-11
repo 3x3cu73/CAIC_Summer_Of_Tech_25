@@ -1,8 +1,14 @@
-const router = require('express').Router();
+const express = require('express');
 const authRoutes = require('./routes/authRoutes');
 const chatRoutes = require('./routes/chatRoutes');
 
-router.use('/auth', authRoutes);
-router.use('/chat', chatRoutes);
+module.exports = ({ ChatModel, MessageModel, UserModel }) => {
+    const router = express.Router();
 
-module.exports = router;
+    // You can inject these models into controllers as needed
+
+    router.use('/auth', authRoutes);
+    router.use('/chat', chatRoutes);
+
+    return router;
+};

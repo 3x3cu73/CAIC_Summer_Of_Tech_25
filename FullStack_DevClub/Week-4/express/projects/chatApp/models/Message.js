@@ -26,4 +26,4 @@ const chatMessage = new mongoose.Schema({
     }]
 },{timestamps : true})
 
-module.exports = mongoose.model('Message', chatMessage);
+module.exports = (conn) => conn.model('Message', chatMessage);

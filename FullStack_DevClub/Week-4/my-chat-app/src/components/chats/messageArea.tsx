@@ -63,9 +63,13 @@ function MessageArea({ messages = [], setMessages,chat, ...props }: MessageAreaP
     useEffect(() => {
         if (!socket) return;
 
-        const handler = (msg: { chat: any; _id?: string; content?: string; sender?: { _id: string; username: string; }; createdAt?: string; updatedAt?: string; }) => {
-            if (msg.chat._id === chatId) {
-                setMessages(prev => [...prev, msg]);
+        const handler = (msg: Message) => {
+            // Ensure the message is for the current chat
+            if (msg._id === chatId) {
+                setMessages(prev => {
+                    const exists = prev.some((m: { _id: string; }) => m._id === msg._id);
+                    return exists ? prev : [...prev, msg];
+                });
             }
         };
 
@@ -80,6 +84,21 @@ function MessageArea({ messages = [], setMessages,chat, ...props }: MessageAreaP
     const formatTime = (dateString: string) => {
         const date = new Date(dateString);
         return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    };
+
+    const formatDate = (dateString: string) => {
+        const date = new Date(dateString);
+        const today = new Date();
+        const yesterday = new Date(today);
+        yesterday.setDate(yesterday.getDate() - 1);
+
+        if (date.toDateString() === today.toDateString()) {
+            return "Today";
+        } else if (date.toDateString() === yesterday.toDateString()) {
+            return "Yesterday";
+        } else {
+            return date.toLocaleDateString();
+        }
     };
 
 
@@ -107,52 +126,54 @@ function MessageArea({ messages = [], setMessages,chat, ...props }: MessageAreaP
                         const isFirstInGroup = !prevMessage || prevMessage.sender._id !== message.sender._id;
                         const isLastInGroup = !nextMessage || nextMessage.sender._id !== message.sender._id;
 
-
-                        if (isCurrentUserSender) {
-                        } else {
-                        }
+                        const showDate = !prevMessage || formatDate(prevMessage.createdAt) !== formatDate(message.createdAt);
 
 
                         const tailClass = isLastInGroup ? (isCurrentUserSender ? 'rounded-br-none' : 'rounded-bl-none') : '';
 
 
                         return (
-                            <div
-                                key={message._id}
-                                className={`flex flex-col ${isCurrentUserSender ? 'items-end' : 'items-start'}`}
-                            >
-                                {/* Show sender's name only for the first message in a group */}
-                                {isFirstInGroup && !isCurrentUserSender && (
-                                    <div className="text-xs text-slate-500 ml-3 mb-1 font-medium">
-                                        {message.sender.username}
+                            <React.Fragment key={message._id}>
+                                {showDate && (
+                                    <div className="text-center text-xs text-slate-500 my-4">
+                                        {formatDate(message.createdAt)}
                                     </div>
                                 )}
-
                                 <div
-                                    className={`
-                                        rounded-xl px-4 py-2.5 max-w-lg md:max-w-2xl
-                                        ${tailClass}
-                                        ${isCurrentUserSender
-                                        ? 'bg-indigo-600 text-white'
-                                        : 'bg-white text-slate-800 border border-slate-200'
-                                    }
-                                        ${isFirstInGroup && isCurrentUserSender ? 'mt-3' : ''}
-                                    `}
+                                    className={`flex flex-col ${isCurrentUserSender ? 'items-end' : 'items-start'}`}
                                 >
-
-                                    <p className="text-base break-words whitespace-pre-wrap">{message.content}</p>
-
-
-                                    {isLastInGroup && (
-                                        <p className={`
-                                            text-xs mt-1 text-right opacity-80
-                                            ${isCurrentUserSender ? 'text-indigo-200' : 'text-slate-400'}
-                                        `}>
-                                            {formatTime(message.createdAt)}
-                                        </p>
+                                    {isFirstInGroup && !isCurrentUserSender && (
+                                        <div className="text-xs text-slate-500 ml-3 mb-1 font-medium">
+                                            {message.sender.username}
+                                        </div>
                                     )}
+
+                                    <div
+                                        className={`
+                                            rounded-xl px-4 py-2.5 max-w-lg md:max-w-2xl
+                                            ${tailClass}
+                                            ${isCurrentUserSender
+                                            ? 'bg-indigo-600 text-white'
+                                            : 'bg-white text-slate-800 border border-slate-200'
+                                        }
+                                            ${isFirstInGroup && isCurrentUserSender ? 'mt-3' : ''}
+                                        `}
+                                    >
+
+                                        <p className="text-base break-words whitespace-pre-wrap">{message.content}</p>
+
+
+                                        {isLastInGroup && (
+                                            <p className={`
+                                                text-xs mt-1 text-right opacity-80
+                                                ${isCurrentUserSender ? 'text-indigo-200' : 'text-slate-400'}
+                                            `}>
+                                                {formatTime(message.createdAt)}
+                                            </p>
+                                        )}
+                                    </div>
                                 </div>
-                            </div>
+                            </React.Fragment>
                         );
                     })}
                 </div>
