@@ -27,7 +27,16 @@ module.exports = ({ Chat, Message, User }) => ({
 
             await Chat.findByIdAndUpdate(chatId, { latestMessage: newMessage._id });
 
-            req.io.to(chatId).emit('receiveMessage', newMessage);
+            // Broadcast to all users in the chat except the sender
+            // Get all participants in the chat
+            const participants = newMessage.chat.participants.map(p => p._id.toString());
+            
+            // Broadcast to each participant except the sender
+            participants.forEach(participantId => {
+                if (participantId !== req.user._id.toString()) {
+                    req.io.to(participantId).emit('messageReceived', newMessage);
+                }
+            });
 
             res.status(200).json(newMessage);
         } catch (err) {

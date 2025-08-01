@@ -16,9 +16,6 @@ function Chat({ chat, activeChat, AvatarComponent, ...props }: ChatProps) {
         }
     }
 
-    if(chat) {
-        chat.unreadCount = 2;
-    }
 
 
     if (!chat) {
@@ -66,7 +63,7 @@ function Chat({ chat, activeChat, AvatarComponent, ...props }: ChatProps) {
 
                         <div className="text-sm text-slate-500 truncate">
                             <span className="font-semibold text-slate-600">
-                                {chat.participants.find((p: any) => p._id === chat.latestMessage.sender)?.username}:
+                                {chat.participants.find((p: any) => p._id === (typeof chat.latestMessage.sender === 'object' ? chat.latestMessage.sender._id : chat.latestMessage.sender))?.username}:
                             </span>
                             <span className="ml-1">{chat.latestMessage.content}</span>
                         </div>

@@ -12,9 +12,12 @@ const initializeSocketIO = (io, { Chat, Message, User }) => {
             console.log(`User ${userId} joined personal room.`);
         });
 
-        socket.on('joinChat', (chatId) => {
+        socket.on('joinChat', (chatId, callback) => {
             socket.join(chatId);
             console.log(`User ${socket.id} joined chat room: ${chatId}`);
+            if (callback && typeof callback === 'function') {
+                callback({ success: true, message: "Joined chat successfully" });
+            }
         });
 
         socket.on('newMessage', async (messageData) => {
