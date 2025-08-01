@@ -9,7 +9,7 @@ export interface Sender {
 export type Message = {
     _id: string;
     content: string;
-    chat: string;
+    chat: {_id:string};
     sender: {
         _id: string;
         username: string;

@@ -65,7 +65,7 @@ function MessageArea({ messages = [], setMessages,chat, ...props }: MessageAreaP
 
         const handler = (msg: Message) => {
             // Ensure the message is for the current chat
-            if (msg.chat && ( msg.chat === chatId)) {
+            if (msg.chat && ( msg.chat._id === chatId)) {
                 setMessages(prev => {
                     const exists = prev.some((m: { _id: string; }) => m._id === msg._id);
                     return exists ? prev : [...prev, msg];
